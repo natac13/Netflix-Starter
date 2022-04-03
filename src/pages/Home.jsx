@@ -22,6 +22,10 @@ const Home = () => {
 
   async function fetchMyList() {
     try {
+      await Moralis.start({
+        serverUrl: "https://nvezkmgfcvz7.usemoralis.com:2053/server",
+        appId: "iaLFUv9UWYDN3Adk1hvxQtHbOdCJG3aOUV0Ksfyg",
+      }); //if getting errors add this
       const theList = await Moralis.Cloud.run("getMyList", {
         addrs: account,
       });
@@ -35,6 +39,7 @@ const Home = () => {
       console.log({ error });
     }
   }
+
   React.useEffect(() => {
     fetchMyList();
     // eslint-disable-next-line
