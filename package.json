@@ -28,7 +28,7 @@
     "web3uikit": "^0.1.75"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PUBLIC_URL='/' react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "predeploy": "yarn build",
