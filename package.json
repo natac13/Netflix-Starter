@@ -50,5 +50,6 @@
   "devDependencies": {
     "axios": "^0.26.1",
     "typescript": "^4.6.3"
-  }
+  },
+  "homepage": "https://natac13.github.io/Netflix-Starter"
 }
