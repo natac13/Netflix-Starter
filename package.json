@@ -33,7 +33,7 @@
     "test": "react-scripts test",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "serve": "serve",
+    "serve": "serve build/",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -59,5 +59,5 @@
     "gh-pages": "^3.2.3",
     "typescript": "^4.6.3"
   },
-  "homepage": "https://natac13.github.io/Netflix-Starter/"
+  "homepage": "."
 }
