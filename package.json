@@ -20,6 +20,7 @@
     "react-moralis": "^1.3.1",
     "react-router-dom": "6",
     "react-scripts": "4.0.0",
+    "serve": "^13.0.2",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "url": "^0.11.0",
@@ -30,6 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build",
+    "serve": "serve",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -52,6 +56,7 @@
   },
   "devDependencies": {
     "axios": "^0.26.1",
+    "gh-pages": "^3.2.3",
     "typescript": "^4.6.3"
   },
   "homepage": "https://natac13.github.io/Netflix-Starter"
