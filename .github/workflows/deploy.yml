@@ -12,6 +12,10 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    env:
+      ESLINT_NO_DEV_ERRORS: true
+      DISABLE_ESLINT_PLUGIN: true
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -20,10 +24,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "14"
+          cache: "yarn"
       - name: Install deps
         run: |
-          npm i
-          npm run build
+          yarn
+          yarn build
       - name: deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
