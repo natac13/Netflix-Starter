@@ -1,13 +1,63 @@
 import React from "react";
 import "./Home.css";
 import { Logo } from "../images/Netflix.js";
-import { Button, ConnectButton, Icon, Modal, Tab, TabList } from "web3uikit";
+import {
+  Button,
+  ConnectButton,
+  Icon,
+  Modal,
+  Tab,
+  TabList,
+  useNotification,
+} from "web3uikit";
 import { movies } from "../helpers/library";
 import { Link } from "react-router-dom";
+import { useMoralis } from "react-moralis";
 
 const Home = () => {
   const [visible, setVisible] = React.useState(false);
   const [selectedFilm, setSelectedFilm] = React.useState();
+  const [myMovies, setMyMovies] = React.useState([]);
+  const { isAuthenticated, Moralis, account } = useMoralis();
+
+  async function fetchMyList() {
+    try {
+      const theList = await Moralis.Cloud.run("getMyList", {
+        addrs: account,
+      });
+
+      console.log({ theList });
+
+      const filtered = movies.filter((movie) => theList.includes(movie.Name));
+
+      setMyMovies(filtered);
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+  React.useEffect(() => {
+    fetchMyList();
+  }, [account]);
+
+  const dispatch = useNotification();
+
+  const handleNewNotification = () => {
+    dispatch({
+      type: "error",
+      message: "Please Connect Your Wallet",
+      title: "Not Authenticated",
+      position: "topL",
+    });
+  };
+
+  const handleAddNotification = () => {
+    dispatch({
+      type: "success",
+      message: "Movie Added to List",
+      title: "Success",
+      position: "topL",
+    });
+  };
 
   return (
     <>
@@ -34,21 +84,48 @@ const Home = () => {
               />
               <p className="sceneDesc">{movies[0].Description}</p>
               <div className="playButton">
-                <Button
-                  icon="chevronRightX2"
-                  text="Play"
-                  theme="secondary"
-                  type="button"
-                />
-                <Button
-                  icon="plus"
-                  text="Add to My List"
-                  theme="translucent"
-                  type="button"
-                  onClick={() => {
-                    // console.log(myMovies);
-                  }}
-                />
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/player" state={movies[0].Movie}>
+                      <Button
+                        icon="chevronRightX2"
+                        text="Play"
+                        theme="secondary"
+                        type="button"
+                      />
+                    </Link>
+                    <Button
+                      icon="plus"
+                      text="Add to My List"
+                      theme="translucent"
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          console.log({ isAuthenticated, myMovies });
+                        } catch (error) {
+                          console.log({ error });
+                        }
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      icon="chevronRightX2"
+                      text="Play"
+                      theme="secondary"
+                      type="button"
+                      onClick={handleNewNotification}
+                    />
+                    <Button
+                      icon="plus"
+                      text="Add to My List"
+                      theme="translucent"
+                      type="button"
+                      onClick={handleNewNotification}
+                    />
+                  </>
+                )}
               </div>
             </div>
             <div className="title">Movies</div>
@@ -70,7 +147,35 @@ const Home = () => {
             </div>
           </Tab>
           <Tab tabKey={2} tabName={"Series"} isDisabled></Tab>
-          <Tab tabKey={3} tabName={"MyList"}></Tab>
+          <Tab tabKey={3} tabName={"MyList"}>
+            <div className="ownListContent">
+              {console.log({ myMovies, isAuthenticated })}
+              <div className="title">Your Library</div>
+              {myMovies && isAuthenticated ? (
+                <>
+                  <div className="ownThumbs">
+                    {myMovies.map((movie) => {
+                      return (
+                        <img
+                          src={movie.Thumnbnail}
+                          className="thumbnail"
+                          onClick={() => {
+                            setSelectedFilm(movie);
+                            setVisible(true);
+                          }}
+                          alt="movie thumb"
+                        ></img>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="ownThumbs">
+                  You need to Authenicate To View Your My list
+                </div>
+              )}
+            </div>
+          </Tab>
         </TabList>
         {selectedFilm && (
           <div className="modal">
@@ -92,23 +197,55 @@ const Home = () => {
                   className="modalLogo"
                 />
                 <div className="modalPlayButton">
-                  <Link to="/player" state={selectedFilm.Movie}>
-                    <Button
-                      icon="chevronRightX2"
-                      text="Play"
-                      theme="secondary"
-                      type="button"
-                    />
-                  </Link>
-                  <Button
-                    icon="plus"
-                    text="Add to My List"
-                    theme="translucent"
-                    type="button"
-                    onClick={() => {
-                      // console.log(myMovies);
-                    }}
-                  />
+                  {isAuthenticated ? (
+                    <>
+                      <Link to="/player" state={selectedFilm.Movie}>
+                        <Button
+                          icon="chevronRightX2"
+                          text="Play"
+                          theme="secondary"
+                          type="button"
+                        />
+                      </Link>
+                      <Button
+                        icon="plus"
+                        text="Add to My List"
+                        theme="translucent"
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            if (selectedFilm) {
+                              await Moralis.Cloud.run("updateMyList", {
+                                addrs: account,
+                                newFav: selectedFilm.Name,
+                              });
+                              fetchMyList();
+                              handleAddNotification();
+                            }
+                          } catch (error) {
+                            console.log({ error });
+                          }
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        icon="chevronRightX2"
+                        text="Play"
+                        theme="secondary"
+                        type="button"
+                        onClick={handleNewNotification}
+                      />
+                      <Button
+                        icon="plus"
+                        text="Add to My List"
+                        theme="translucent"
+                        type="button"
+                        onClick={handleNewNotification}
+                      />
+                    </>
+                  )}
                 </div>
                 <div className="movieInfo">
                   <div className="description">
