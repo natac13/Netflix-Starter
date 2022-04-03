@@ -37,6 +37,7 @@ const Home = () => {
   }
   React.useEffect(() => {
     fetchMyList();
+    // eslint-disable-next-line
   }, [account]);
 
   const dispatch = useNotification();
